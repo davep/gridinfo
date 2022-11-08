@@ -1,0 +1,70 @@
+#!/usr/bin/env python
+"""A tool for getting information about the Second Life grid."""
+
+##############################################################################
+# Third party imports.
+from textual.app        import App, ComposeResult
+from textual.binding    import Binding
+from textual.widgets    import Header, Footer, Input, Button, Static
+from textual.containers import Container, Horizontal
+
+##############################################################################
+class GridInfo( App[ None ] ):
+    """TUI app for showing information about the Second Life grid."""
+
+    CSS_PATH = "gridinfo.css"
+    """The name of the CSS file for the app."""
+
+    TITLE = "Grid Information"
+    """str: The title of the application."""
+
+    BINDINGS = [
+        Binding( "q", "quit", "Quit" )
+    ]
+    """The main bindings for the app."""
+
+    def compose( self ) -> ComposeResult:
+        """Compose the display of the application.
+
+        Returns:
+            ComposeResult: The main layout for the application.
+        """
+        yield Header()
+        yield Horizontal(
+            Input( placeholder="Second Life Region Name" ),
+            Button( "Search", disabled=True ),
+            id="region-input"
+        )
+        yield Container( Static(), id="result" )
+        yield Footer()
+
+    def on_mount( self ) -> None:
+        """Set the app up once the DOM is loaded."""
+        self.set_focus( self.query_one( "#region-input Input", Input ) )
+
+    def on_input_changed( self, event: Input.Changed ) -> None:
+        """React to the region name being modified.
+
+        Args:
+            event (Input.Changed): The event for the change.
+        """
+        self.query_one(
+            "#region-input Button", Button
+        ).disabled = not bool( event.input.value )
+
+    def on_button_pressed( self, event: Button.Pressed ) -> None:
+        """React to the search button being pressed.
+
+        Args:
+            event (Button.Pressed): The event for the press.
+        """
+        self.query_one( "#result Static", Static ).update(
+            f"We'd go look up stuff about {self.query_one( Input ).value}"
+        )
+
+##############################################################################
+# Main entry point.
+if __name__ == "__main__":
+    GridInfo().run()
+
+### gridinfo.py ends here
