@@ -50,7 +50,7 @@ class GridInfo( App[ None ] ):
         """
         self.query_one(
             "#region-input Button", Button
-        ).disabled = not bool( event.input.value )
+        ).disabled = not bool( event.input.value.strip() )
 
     def on_button_pressed( self, event: Button.Pressed ) -> None:
         """React to the search button being pressed.
