@@ -2,11 +2,78 @@
 """A tool for getting information about the Second Life grid."""
 
 ##############################################################################
-# Third party imports.
+# Python imports.
+from urllib.request import urlopen
+from urllib.parse   import quote
+from pathlib        import Path
+
+##############################################################################
+# Textual imports.
 from textual.app        import App, ComposeResult
 from textual.binding    import Binding
+from textual.css.query  import NoMatches
 from textual.widgets    import Header, Footer, Input, Button, Static
 from textual.containers import Container, Horizontal
+
+##############################################################################
+# Rich Pixels imports.
+from rich_pixels import Pixels
+
+##############################################################################
+def gridsurvey( query: str ) -> str:
+    """Return the URL for the given Grid Survey query.
+
+    Args:
+        query (str): The query to make.
+
+    Returns:
+        str: The full URL for the query.
+    """
+    return f"http://api.gridsurvey.com/{query}"
+
+##############################################################################
+def region_info( region: str ) -> dict[ str, str ]:
+    """Get information about a given region.
+
+    Args:
+        region (str): The region to get the information for.
+
+    Returns:
+        dict[ str, str ]: The data for that region.
+    """
+    with urlopen( gridsurvey( f"simquery.php?region={quote( region )}" ) ) as response:
+        return dict( line.split() for line in response.read().decode().split( "\n" ) )
+
+##############################################################################
+def region_map( map_uuid: str ) -> Pixels:
+    """Given a map UUID, get the texture.
+
+    Args:
+        map_uuid (str): The UUID of the map to acquire.
+
+    Returns:
+        Pixels: The ``Pixel`` image.
+    """
+    img = Path( "foo.jpg" )     # TODO: tmpfile
+    with urlopen( f"http://secondlife.com/app/image/{map_uuid}/2" ) as response:
+        img.write_bytes( response.read() )
+        return Pixels.from_image_path( img, resize=( 40, 40 ) )
+
+##############################################################################
+class Label( Static ):
+    """A widget for showing a label."""
+
+    def __init__( self, label: str ) -> None:
+        """Initialise a label.
+
+        Args:
+            label (str): The text of the label.
+        """
+        super().__init__( f"{label}:")
+
+##############################################################################
+class Value( Static ):
+    """A widget for showing a value."""
 
 ##############################################################################
 class GridInfo( App[ None ] ):
@@ -35,7 +102,22 @@ class GridInfo( App[ None ] ):
             Button( "Search", disabled=True ),
             id="region-input"
         )
-        yield Container( Static(), id="result" )
+        yield Container(
+            Horizontal( Label( "Name" ), Value( id="name" ) ),
+            Horizontal( Label( "Status" ), Value( id="status" ) ),
+            Horizontal( Label( "X" ), Value( id="x" ) ),
+            Horizontal( Label( "Y" ), Value( id="y" ) ),
+            Horizontal( Label( "Access" ), Value( id="access" ) ),
+            Horizontal( Label( "Estate" ), Value( id="estate" ) ),
+            Horizontal( Label( "First Seen" ), Value( id="firstseen" ) ),
+            Horizontal( Label( "Last Seen" ), Value( id="lastseen" ) ),
+            Horizontal( Label( "Objects Map" ), Value( id="objects_uuid" ) ),
+            Horizontal( Label( "Terrain Map" ), Value( id="terrain_uuid" ) ),
+            Horizontal( Label( "Updated" ), Value( id="updated" ) ),
+            Horizontal( Label( "UUID" ), Value( id="region_uuid" ) ),
+            id="data"
+        )
+        yield Static( id="map" )
         yield Footer()
 
     def on_mount( self ) -> None:
@@ -52,15 +134,20 @@ class GridInfo( App[ None ] ):
             "#region-input Button", Button
         ).disabled = not bool( event.input.value.strip() )
 
-    def on_button_pressed( self, event: Button.Pressed ) -> None:
+    def on_button_pressed( self, _: Button.Pressed ) -> None:
         """React to the search button being pressed.
 
         Args:
             event (Button.Pressed): The event for the press.
         """
-        self.query_one( "#result Static", Static ).update(
-            f"We'd go look up stuff about {self.query_one( Input ).value}"
-        )
+        # TODO: Do this in the background.
+        data = region_info( self.query_one( Input ).value )
+        for key, value in data.items():
+            try:
+                self.query_one( f"#{key}", Value ).update( value )
+            except NoMatches:
+                pass
+        self.query_one( "#map", Static ).update( region_map( data[ "objects_uuid" ] ) )
 
 ##############################################################################
 # Main entry point.

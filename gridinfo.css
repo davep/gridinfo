@@ -1,5 +1,4 @@
 #region-input {
-    dock: top;
     height: auto;
     color: $primary;
     background: $primary-background;
@@ -13,8 +12,23 @@
     width: 1fr;
 }
 
-#result {
-    height: 100%;
+#data {
+    layout: grid;
+    grid-size: 2;
+    height: 8;
     border: solid $secondary;
     background: $secondary-background;
 }
+
+Label {
+    width: 12;
+    text-style: bold;
+    text-align: right;
+    margin: 0 1 0 0;
+}
+
+#map {
+
+}
+
+/* gridinfo.css ends here */
