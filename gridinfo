@@ -156,7 +156,8 @@ class GridInfo( App[ None ] ):
                 self.query_one( f"#{key}", Value ).update( value )
             except NoMatches:
                 pass
-        self.query_one( "#map", Static ).update( region_map( data[ "objects_uuid" ] ) )
+        map = self.query_one( "#map", Static )
+        map.update( region_map( data[ "objects_uuid" ], map.size.width ) )
 
 ##############################################################################
 # Main entry point.
