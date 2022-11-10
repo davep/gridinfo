@@ -96,28 +96,36 @@ class GridInfo( App[ None ] ):
         Returns:
             ComposeResult: The main layout for the application.
         """
+
         yield Header()
+
         yield Horizontal(
             Input( placeholder="Second Life Region Name" ),
             Button( "Search", disabled=True ),
             id="region-input"
         )
+
+        def _data( label: str, value_id: str ) -> Horizontal:
+            return Horizontal( Label( label ), Value( id=value_id ) )
+
         yield Container(
-            Horizontal( Label( "Name" ), Value( id="name" ) ),
-            Horizontal( Label( "Status" ), Value( id="status" ) ),
-            Horizontal( Label( "X" ), Value( id="x" ) ),
-            Horizontal( Label( "Y" ), Value( id="y" ) ),
-            Horizontal( Label( "Access" ), Value( id="access" ) ),
-            Horizontal( Label( "Estate" ), Value( id="estate" ) ),
-            Horizontal( Label( "First Seen" ), Value( id="firstseen" ) ),
-            Horizontal( Label( "Last Seen" ), Value( id="lastseen" ) ),
-            Horizontal( Label( "Objects Map" ), Value( id="objects_uuid" ) ),
-            Horizontal( Label( "Terrain Map" ), Value( id="terrain_uuid" ) ),
-            Horizontal( Label( "Updated" ), Value( id="updated" ) ),
-            Horizontal( Label( "UUID" ), Value( id="region_uuid" ) ),
+            _data( "Name", "name" ),
+            _data( "Status", "status" ),
+            _data( "X", "x" ),
+            _data( "Y", "y" ),
+            _data( "Access", "access" ),
+            _data( "Estate", "estate" ),
+            _data( "First Seen", "firstseen" ),
+            _data( "Last Seen", "lastseen" ),
+            _data( "Objects Map", "objects_uuid" ),
+            _data( "Terrain Map", "terrain_uuid" ),
+            _data( "Updated", "updated" ),
+            _data( "UUID", "region_uuid" ),
             id="data"
         )
+
         yield Static( id="map" )
+
         yield Footer()
 
     def on_mount( self ) -> None:
