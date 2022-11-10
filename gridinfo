@@ -45,11 +45,12 @@ def region_info( region: str ) -> dict[ str, str ]:
         return dict( line.split() for line in response.read().decode().split( "\n" ) )
 
 ##############################################################################
-def region_map( map_uuid: str ) -> Pixels:
+def region_map( map_uuid: str, size: int=40 ) -> Pixels:
     """Given a map UUID, get the texture.
 
     Args:
         map_uuid (str): The UUID of the map to acquire.
+        size (int, optional): The size of a side of the resulting map tile.
 
     Returns:
         Pixels: The ``Pixel`` image.
