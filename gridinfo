@@ -6,6 +6,7 @@
 from urllib.request import urlopen
 from urllib.parse   import quote
 from pathlib        import Path
+from tempfile       import NamedTemporaryFile
 
 ##############################################################################
 # Textual imports.
@@ -54,10 +55,10 @@ def region_map( map_uuid: str ) -> Pixels:
     Returns:
         Pixels: The ``Pixel`` image.
     """
-    img = Path( "foo.jpg" )     # TODO: tmpfile
-    with urlopen( f"http://secondlife.com/app/image/{map_uuid}/2" ) as response:
-        img.write_bytes( response.read() )
-        return Pixels.from_image_path( img, resize=( 40, 40 ) )
+    with NamedTemporaryFile() as img:
+        with urlopen( f"http://secondlife.com/app/image/{map_uuid}/2" ) as response:
+            img.write( response.read() )
+        return Pixels.from_image_path( img.name, resize=( size, size ) )
 
 ##############################################################################
 class Label( Static ):
