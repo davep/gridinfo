@@ -143,12 +143,7 @@ class GridInfo( App[ None ] ):
             "#region-input Button", Button
         ).disabled = not bool( event.input.value.strip() )
 
-    def on_button_pressed( self, _: Button.Pressed ) -> None:
-        """React to the search button being pressed.
-
-        Args:
-            event (Button.Pressed): The event for the press.
-        """
+    def update_region_data( self ) -> None:
         # TODO: Do this in the background.
         data = region_info( self.query_one( Input ).value )
         for key, value in data.items():
@@ -158,6 +153,22 @@ class GridInfo( App[ None ] ):
                 pass
         map = self.query_one( "#map", Static )
         map.update( region_map( data[ "objects_uuid" ], map.size.width ) )
+
+    def on_input_submitted( self, _: Input.Submitted ) -> None:
+        """React to input being submitted.
+
+        Args:
+            event (Input.Submitted): The even for the submit.
+        """
+        self.update_region_data()
+
+    def on_button_pressed( self, _: Button.Pressed ) -> None:
+        """React to the search button being pressed.
+
+        Args:
+            event (Button.Pressed): The event for the press.
+        """
+        self.update_region_data()
 
 ##############################################################################
 # Main entry point.
