@@ -193,7 +193,6 @@ class RegionInfo( Screen ):
     async def update_region_data( self ) -> None:
         """Update the region data."""
         data = await region_info( self.query_one( Input ).value )
-        print( data )
         for key, value in data.items():
             try:
                 self.query_one( f"#{key}", DataPair ).value( value )
