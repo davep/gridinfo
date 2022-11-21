@@ -297,7 +297,7 @@ class Main( Screen ):
             DataPair( "Signups Last Updated", "signups_updated_unix", cleaner=_unix_to_local ),
             DataPair( "Signups", "signups", cleaner=_human_number ),
             DataPair( "Exchange Rate Last Updated", "exchange_rate_updated_unix", cleaner=_unix_to_local ),
-            id      = "grid-data"
+            id = "grid-data"
         )
         yield Card(
             "Grid Concurrency",
@@ -307,7 +307,7 @@ class Main( Screen ):
             DataPair( "Mean", "mean_online", cleaner=_human_number ),
             DataPair( "Minimum", "min_online", cleaner=_human_number ),
             DataPair( "Maximum", "max_online", cleaner=_human_number ),
-            id      = "grid-concurrency"
+            id = "grid-concurrency"
         )
         yield Footer()
 
