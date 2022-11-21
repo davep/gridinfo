@@ -6,6 +6,7 @@ name = "pypi"
 [packages]
 rich-pixels = {extras = ["image"], version = "*"}
 textual = {version = "*", extras = ["dev"]}
+httpx = "*"
 
 [dev-packages]
 
