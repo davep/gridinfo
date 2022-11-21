@@ -12,7 +12,7 @@ from tempfile       import NamedTemporaryFile
 from textual.app        import App, ComposeResult
 from textual.binding    import Binding
 from textual.css.query  import NoMatches
-from textual.widgets    import Header, Footer, Input, Button, Static
+from textual.widgets    import Header, Footer, Input, Button, Static, Label
 from textual.containers import Container, Horizontal
 
 ##############################################################################
@@ -61,22 +61,6 @@ def region_map( map_uuid: str, size: int=40 ) -> Pixels:
         return Pixels.from_image_path( img.name, resize=( size, size ) )
 
 ##############################################################################
-class Label( Static ):
-    """A widget for showing a label."""
-
-    def __init__( self, label: str ) -> None:
-        """Initialise a label.
-
-        Args:
-            label (str): The text of the label.
-        """
-        super().__init__( f"{label}:")
-
-##############################################################################
-class Value( Static ):
-    """A widget for showing a value."""
-
-##############################################################################
 class GridInfo( App[ None ] ):
     """TUI app for showing information about the Second Life grid."""
 
@@ -107,7 +91,7 @@ class GridInfo( App[ None ] ):
         )
 
         def _data( label: str, value_id: str ) -> Horizontal:
-            return Horizontal( Label( label ), Value( id=value_id ) )
+            return Horizontal( Label( f"{label}:", classes="title" ), Label( id=value_id ) )
 
         yield Container(
             _data( "Name", "name" ),
@@ -148,7 +132,7 @@ class GridInfo( App[ None ] ):
         data = region_info( self.query_one( Input ).value )
         for key, value in data.items():
             try:
-                self.query_one( f"#{key}", Value ).update( value )
+                self.query_one( f"#{key}", Label ).update( value )
             except NoMatches:
                 pass
         map = self.query_one( "#map", Static )

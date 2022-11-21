@@ -20,7 +20,7 @@
     background: $secondary-background;
 }
 
-Label {
+.title {
     width: 12;
     text-style: bold;
     text-align: right;
