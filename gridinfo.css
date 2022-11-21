@@ -1,3 +1,24 @@
+.data {
+    layout: grid;
+    grid-size: 2;
+    border: solid $secondary;
+    background: $secondary-background;
+}
+
+.title {
+    text-style: bold;
+    text-align: right;
+    margin: 0 1 0 0;
+}
+
+#grid-data {
+    height: 5;
+}
+
+#grid-data .title {
+    width: 40;
+}
+
 #region-input {
     height: auto;
     color: $primary;
@@ -12,23 +33,16 @@
     width: 1fr;
 }
 
-#data {
-    layout: grid;
-    grid-size: 2;
+#region-info {
     height: 8;
-    border: solid $secondary;
-    background: $secondary-background;
 }
 
-.title {
-    width: 12;
-    text-style: bold;
-    text-align: right;
-    margin: 0 1 0 0;
+#region-info .title {
+    width: 15;
 }
 
 #map {
-
+    overflow-x: auto;
 }
 
 /* gridinfo.css ends here */

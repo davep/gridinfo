@@ -3,8 +3,10 @@
 
 ##############################################################################
 # Python imports.
+from typing       import Callable
 from urllib.parse import quote
 from tempfile     import NamedTemporaryFile
+from datetime     import datetime
 
 ##############################################################################
 # HTTPX imports.
@@ -22,6 +24,24 @@ from textual.containers import Container, Horizontal
 ##############################################################################
 # Rich Pixels imports.
 from rich_pixels import Pixels
+
+##############################################################################
+def unpack_data( data: str, sep: str=" " ) -> dict[ str, str ]:
+    """Unpack data coming from the text APIs.
+
+    Args:
+        data (str): The data to unpack.
+
+    Returns:
+        dict[ str, str ]: The unpacked data.
+    """
+    data_list = data.strip().split( sep )
+    unpacked: dict[ str, str ] = {}
+    while data_list:
+        key, value, *data_list = data_list
+        if key:
+            unpacked[ key ] = value
+    return unpacked
 
 ##############################################################################
 async def get( url: str ) -> httpx.Response:
@@ -58,8 +78,9 @@ async def region_info( region: str ) -> dict[ str, str ]:
     Returns:
         dict[ str, str ]: The data for that region.
     """
-    info = await get( gridsurvey( f"simquery.php?region={quote( region )}" ) )
-    return dict( line.split() for line in info.text.split( "\n" ) )
+    return unpack_data( " ".join(
+        ( await get( gridsurvey( f"simquery.php?region={quote( region )}" ) ) ).text.split( "\n" )
+    ) )
 
 ##############################################################################
 async def region_map( map_uuid: str, size: int=40 ) -> Pixels:
@@ -78,8 +99,41 @@ async def region_map( map_uuid: str, size: int=40 ) -> Pixels:
         return Pixels.from_image_path( img.name, resize=( size, size ) )
 
 ##############################################################################
+class DataPair( Horizontal ):
+    """Provides a widget for displaying a data/value pair."""
+
+    def __init__( self, title: str, id: str, initial: str="", cleaner: Callable[ [ str ], str ]=str ) -> None:
+        """Initialise the data pair display.
+
+        Args:
+            title (str): The title for the data pair.
+            id (str): The ID.
+            initial (str, optional): Optional initial value to use.
+        """
+        super().__init__( id=id )
+        self._title   = title
+        self._initial = initial
+        self._cleaner = cleaner
+        self._value   = Label( self._cleaner( self._initial ) )
+
+    def compose( self ) -> ComposeResult:
+        """Compose the widget.
+
+        Returns:
+            ComposeResult: The layout of the widget.
+        """
+        yield Label( f"{self._title}:", classes="title" )
+        yield self._value
+
+    def value( self, new_value: str ) -> None:
+        self._value.update( self._cleaner( new_value ) )
+
+##############################################################################
 class RegionInfo( Screen ):
     """Screen for looking up information about a specific region."""
+
+    BINDINGS = [ Binding( "escape", "app.pop_screen", "Close" ) ]
+    """Bindings for this screen."""
 
     def compose( self ) -> ComposeResult:
         """Compose the display of the screen.
@@ -96,23 +150,21 @@ class RegionInfo( Screen ):
             id="region-input"
         )
 
-        def _data( label: str, value_id: str ) -> Horizontal:
-            return Horizontal( Label( f"{label}:", classes="title" ), Label( id=value_id ) )
-
         yield Container(
-            _data( "Name", "name" ),
-            _data( "Status", "status" ),
-            _data( "X", "x" ),
-            _data( "Y", "y" ),
-            _data( "Access", "access" ),
-            _data( "Estate", "estate" ),
-            _data( "First Seen", "firstseen" ),
-            _data( "Last Seen", "lastseen" ),
-            _data( "Objects Map", "objects_uuid" ),
-            _data( "Terrain Map", "terrain_uuid" ),
-            _data( "Updated", "updated" ),
-            _data( "UUID", "region_uuid" ),
-            id="data"
+            DataPair( "Name", "name" ),
+            DataPair( "Status", "status" ),
+            DataPair( "X", "x" ),
+            DataPair( "Y", "y" ),
+            DataPair( "Access", "access" ),
+            DataPair( "Estate", "estate" ),
+            DataPair( "First Seen", "firstseen" ),
+            DataPair( "Last Seen", "lastseen" ),
+            DataPair( "Objects Map", "objects_uuid" ),
+            DataPair( "Terrain Map", "terrain_uuid" ),
+            DataPair( "Updated", "updated" ),
+            DataPair( "UUID", "region_uuid" ),
+            id="region-info",
+            classes="data"
         )
 
         yield Static( id="map" )
@@ -139,7 +191,7 @@ class RegionInfo( Screen ):
         print( data )
         for key, value in data.items():
             try:
-                self.query_one( f"#{key}", Label ).update( value )
+                self.query_one( f"#{key}", DataPair ).value( value )
             except NoMatches:
                 pass
         map = self.query_one( "#map", Static )
@@ -162,6 +214,71 @@ class RegionInfo( Screen ):
         await self.update_region_data()
 
 ##############################################################################
+async def grid_data() -> dict[ str, str ]:
+    """Get the main data about the grid.
+
+    Returns:
+        dict[ str, str ]: The main grid information.
+    """
+    return unpack_data( ( await get( "https://api.secondlife.com/datafeeds/homepage.txt" ) ).text, "\n" )
+
+##############################################################################
+class Main( Screen ):
+    """The main screen for the application."""
+
+    BINDINGS = [
+        Binding( "escape", "app.quit", "Quit" ),
+        Binding( "slash", "region", "Region Search" )
+    ]
+    """The bindings for the main screen."""
+
+    def compose(self) -> ComposeResult:
+        """Compose the layout of the main screen.
+
+        Returns:
+            ComposeResult: The layout for the main screen.
+        """
+
+        def _unix_to_local( unix: str ) -> str:
+            return str( datetime.utcfromtimestamp( int( unix or "0" ) ) )
+
+        def _human_number( signups: str ) -> str:
+            return f"{int( signups or '0' ):,}"
+
+        def _linden_dollar( linden_dollar: str ) -> str:
+            return linden_dollar # TODO
+
+        yield Header()
+        yield Container(
+            DataPair( "Exchange Rate", "exchange_rate", cleaner=_linden_dollar ),
+            DataPair( "In-world Last Updated", "inworld_updated_unix", cleaner=_unix_to_local ),
+            DataPair( "In-World", "inworld", cleaner=_human_number ),
+            DataPair( "Signups Last Updated", "signups_updated_unix", cleaner=_unix_to_local ),
+            DataPair( "Signups", "signups", cleaner=_human_number ),
+            DataPair( "Exchange Rate Last Updated", "exchange_rate_updated_unix", cleaner=_unix_to_local ),
+            id="grid-data",
+            classes="data"
+        )
+        yield Footer()
+
+    async def refresh_grid_info( self ):
+        """Refresh the information about the grid."""
+        data = await grid_data()
+        for key, value in data.items():
+            try:
+                self.query_one( f"#{key}", DataPair ).value( value )
+            except NoMatches:
+                pass
+
+    def on_mount( self ) -> None:
+        """Set things in motion on mount"""
+        self.call_after_refresh( self.refresh_grid_info )
+
+    def action_region( self ) -> None:
+        """Show the region search/information screen."""
+        self.app.push_screen( "region" )
+
+##############################################################################
 class GridInfo( App[ None ] ):
     """TUI app for showing information about the Second Life grid."""
 
@@ -171,17 +288,15 @@ class GridInfo( App[ None ] ):
     TITLE = "Grid Information"
     """str: The title of the application."""
 
-    BINDINGS = [
-        Binding( "q", "quit", "Quit" )
-    ]
-    """The main bindings for the app."""
-
-    SCREENS = { "region": RegionInfo }
+    SCREENS = {
+        "main": Main,
+        "region": RegionInfo
+    }
     """The collection of application screens."""
 
     def on_mount( self ) -> None:
-        """Set the app up once the DOM is loaded."""
-        self.push_screen( "region" )
+        """Set up the application on startup."""
+        self.push_screen( "main" )
 
 ##############################################################################
 # Main entry point.
