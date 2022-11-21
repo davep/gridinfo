@@ -109,6 +109,20 @@ async def region_map( map_uuid: str, size: int=40 ) -> Pixels:
         return Pixels.from_image_path( img.name, resize=( size, size ) )
 
 ##############################################################################
+def show_data( within: Container, data: dict[ str, str ] ) -> None:
+    """Show the data within the given panel.
+
+    Args:
+        within (Container): The container that contains the fields.
+        data (dict[ str, str ]): The data to show.
+    """
+    for key, value in data.items():
+        try:
+            within.query_one( f"#{key}", DataPair ).value( value )
+        except NoMatches:
+            pass
+
+##############################################################################
 class DataPair( Horizontal ):
     """Provides a widget for displaying a data/value pair."""
 
@@ -193,11 +207,7 @@ class RegionInfo( Screen ):
     async def update_region_data( self ) -> None:
         """Update the region data."""
         data = await region_info( self.query_one( Input ).value )
-        for key, value in data.items():
-            try:
-                self.query_one( f"#{key}", DataPair ).value( value )
-            except NoMatches:
-                pass
+        show_data( self.query_one( "#region-info", Container ), data )
         map = self.query_one( "#map", Static )
         map.update( await region_map( data[ "objects_uuid" ], map.size.width ) )
 
@@ -291,21 +301,11 @@ class Main( Screen ):
 
     async def refresh_grid_info( self ):
         """Refresh the information about the grid."""
-        data = await grid_data()
-        for key, value in data.items():
-            try:
-                self.query_one( f"#{key}", DataPair ).value( value )
-            except NoMatches:
-                pass
+        show_data( self.query_one( "#grid-data", Container ), await grid_data() )
 
     async def refresh_grid_concurrency( self ):
         """Refresh the grid concurrency data."""
-        data = await concurrency_data()
-        for key, value in data.items():
-            try:
-                self.query_one( f"#{key}", DataPair ).value( value )
-            except NoMatches:
-                pass
+        show_data( self.query_one( "#grid-concurrency", Container ), await concurrency_data() )
 
     def on_mount( self ) -> None:
         """Set things in motion on mount"""
