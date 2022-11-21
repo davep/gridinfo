@@ -1,7 +1,20 @@
-.data {
+Card {
+    height: auto;
+}
+
+Card .caption {
+    margin: 1 1 0 1;
+    padding: 0 1 0 1;
+    background: $secondary-background;
+    width: auto;
+    border: hkey $secondary;
+}
+
+Card .data {
+    margin: 0 1 0 1;
     layout: grid;
     grid-size: 2;
-    border: solid $secondary;
+    border: vkey $secondary;
     background: $secondary-background;
 }
 
@@ -11,7 +24,7 @@
     margin: 0 1 0 0;
 }
 
-#grid-data {
+#grid-data .data {
     height: 5;
 }
 
@@ -19,7 +32,7 @@
     width: 30;
 }
 
-#grid-concurrency {
+#grid-concurrency .data {
     height: 5;
 }
 
@@ -28,6 +41,7 @@
 }
 
 #region-input {
+    margin: 0 1 0 1;
     height: auto;
     color: $primary;
     background: $primary-background;
@@ -41,7 +55,7 @@
     width: 1fr;
 }
 
-#region-info {
+#region-info .data {
     height: 8;
 }
 
