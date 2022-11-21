@@ -260,6 +260,17 @@ async def concurrency_data() -> dict[ str, str ]:
     ) )
 
 ##############################################################################
+async def grid_size_data() -> dict[ str, str ]:
+    """Get the grid size data about the grid.
+
+    Returns:
+        dict[ str, str ]: The grid's size data.
+    """
+    return unpack_data( " ".join(
+        ( await get( gridsurvey( "metricquery.php?metric=grid_size" ) ) ).text.split( "\n" )
+    ) )
+
+##############################################################################
 class Main( Screen ):
     """The main screen for the application."""
 
@@ -309,6 +320,18 @@ class Main( Screen ):
             DataPair( "Maximum", "max_online", cleaner=_human_number ),
             id = "grid-concurrency"
         )
+        yield Card(
+            "Grid Size",
+            DataPair( "Private Regions", "private", cleaner=_human_number ),
+            DataPair( "Adult Regions", "adult", cleaner=_human_number ),
+            DataPair( "Linden Lab Regions", "linden", cleaner=_human_number ),
+            DataPair( "Mature Regions", "mature", cleaner=_human_number ),
+            DataPair( "Linden Home Regions", "linden_homes", cleaner=_human_number ),
+            DataPair( "General Regions", "pg", cleaner=_human_number ),
+            DataPair( "Total Regions", "total", cleaner=_human_number ),
+            DataPair( "Last Updated", "updated" ),
+            id = "grid-size"
+        )
         yield Footer()
 
     async def refresh_grid_info( self ):
@@ -319,10 +342,15 @@ class Main( Screen ):
         """Refresh the grid concurrency data."""
         show_data( self.query_one( "#grid-concurrency", Card ), await concurrency_data() )
 
+    async def refresh_grid_size( self ):
+        """Refresh the grid size data."""
+        show_data( self.query_one( "#grid-size", Card ), await grid_size_data() )
+
     def on_mount( self ) -> None:
         """Set things in motion on mount"""
         self.call_after_refresh( self.refresh_grid_info )
         self.call_after_refresh( self.refresh_grid_concurrency )
+        self.call_after_refresh( self.refresh_grid_size )
 
     def action_region( self ) -> None:
         """Show the region search/information screen."""

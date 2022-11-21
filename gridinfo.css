@@ -40,6 +40,14 @@ Card .data {
     width: 30;
 }
 
+#grid-size .data {
+    height: 6;
+}
+
+#grid-size .title {
+    width: 30;
+}
+
 #region-input {
     margin: 0 1 0 1;
     height: auto;
