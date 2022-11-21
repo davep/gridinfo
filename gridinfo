@@ -188,11 +188,11 @@ class RegionInfo( Screen ):
         )
         yield Card(
             "Region Details",
-            DataPair( "Name", "name" ),
-            DataPair( "Status", "status" ),
+            DataPair( "Name", "name", cleaner=lambda name: name.replace( "+", " " ) ),
+            DataPair( "Status", "status", cleaner=str.capitalize ),
             DataPair( "X", "x" ),
             DataPair( "Y", "y" ),
-            DataPair( "Access", "access" ),
+            DataPair( "Access", "access", cleaner=str.capitalize ),
             DataPair( "Estate", "estate" ),
             DataPair( "First Seen", "firstseen" ),
             DataPair( "Last Seen", "lastseen" ),
