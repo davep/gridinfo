@@ -13,6 +13,7 @@ import httpx
 ##############################################################################
 # Textual imports.
 from textual.app        import App, ComposeResult
+from textual.screen     import Screen
 from textual.binding    import Binding
 from textual.css.query  import NoMatches
 from textual.widgets    import Header, Footer, Input, Button, Static, Label
@@ -77,22 +78,11 @@ async def region_map( map_uuid: str, size: int=40 ) -> Pixels:
         return Pixels.from_image_path( img.name, resize=( size, size ) )
 
 ##############################################################################
-class GridInfo( App[ None ] ):
-    """TUI app for showing information about the Second Life grid."""
-
-    CSS_PATH = "gridinfo.css"
-    """The name of the CSS file for the app."""
-
-    TITLE = "Grid Information"
-    """str: The title of the application."""
-
-    BINDINGS = [
-        Binding( "q", "quit", "Quit" )
-    ]
-    """The main bindings for the app."""
+class RegionInfo( Screen ):
+    """Screen for looking up information about a specific region."""
 
     def compose( self ) -> ComposeResult:
-        """Compose the display of the application.
+        """Compose the display of the screen.
 
         Returns:
             ComposeResult: The main layout for the application.
@@ -170,6 +160,28 @@ class GridInfo( App[ None ] ):
             event (Button.Pressed): The event for the press.
         """
         await self.update_region_data()
+
+##############################################################################
+class GridInfo( App[ None ] ):
+    """TUI app for showing information about the Second Life grid."""
+
+    CSS_PATH = "gridinfo.css"
+    """The name of the CSS file for the app."""
+
+    TITLE = "Grid Information"
+    """str: The title of the application."""
+
+    BINDINGS = [
+        Binding( "q", "quit", "Quit" )
+    ]
+    """The main bindings for the app."""
+
+    SCREENS = { "region": RegionInfo }
+    """The collection of application screens."""
+
+    def on_mount( self ) -> None:
+        """Set the app up once the DOM is loaded."""
+        self.push_screen( "region" )
 
 ##############################################################################
 # Main entry point.
