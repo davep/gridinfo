@@ -23,7 +23,7 @@ from textual.containers import Container, Horizontal
 from rich_pixels import Pixels
 
 ##############################################################################
-def get( url: str ) -> httpx.Response:
+async def get( url: str ) -> httpx.Response:
     """Get a response from a URL.
 
     Args:
@@ -32,7 +32,8 @@ def get( url: str ) -> httpx.Response:
     Returns:
         httpx.Response: The response.
     """
-    return httpx.get( url, follow_redirects=True )
+    async with httpx.AsyncClient() as client:
+        return await client.get( url, follow_redirects=True )
 
 ##############################################################################
 def gridsurvey( query: str ) -> str:
@@ -47,7 +48,7 @@ def gridsurvey( query: str ) -> str:
     return f"http://api.gridsurvey.com/{query}"
 
 ##############################################################################
-def region_info( region: str ) -> dict[ str, str ]:
+async def region_info( region: str ) -> dict[ str, str ]:
     """Get information about a given region.
 
     Args:
@@ -56,13 +57,11 @@ def region_info( region: str ) -> dict[ str, str ]:
     Returns:
         dict[ str, str ]: The data for that region.
     """
-    return dict(
-        line.split() for line in
-        get( gridsurvey( f"simquery.php?region={quote( region )}" ) ).text.split( "\n" )
-    )
+    info = await get( gridsurvey( f"simquery.php?region={quote( region )}" ) )
+    return dict( line.split() for line in info.text.split( "\n" ) )
 
 ##############################################################################
-def region_map( map_uuid: str, size: int=40 ) -> Pixels:
+async def region_map( map_uuid: str, size: int=40 ) -> Pixels:
     """Given a map UUID, get the texture.
 
     Args:
@@ -73,7 +72,8 @@ def region_map( map_uuid: str, size: int=40 ) -> Pixels:
         Pixels: The ``Pixel`` image.
     """
     with NamedTemporaryFile() as img:
-        img.write( get( f"http://secondlife.com/app/image/{map_uuid}/2" ).content )
+        map_data = await get( f"http://secondlife.com/app/image/{map_uuid}/2" )
+        img.write( map_data.content )
         return Pixels.from_image_path( img.name, resize=( size, size ) )
 
 ##############################################################################
@@ -143,32 +143,33 @@ class GridInfo( App[ None ] ):
             "#region-input Button", Button
         ).disabled = not bool( event.input.value.strip() )
 
-    def update_region_data( self ) -> None:
-        # TODO: Do this in the background.
-        data = region_info( self.query_one( Input ).value )
+    async def update_region_data( self ) -> None:
+        """Update the region data."""
+        data = await region_info( self.query_one( Input ).value )
+        print( data )
         for key, value in data.items():
             try:
                 self.query_one( f"#{key}", Label ).update( value )
             except NoMatches:
                 pass
         map = self.query_one( "#map", Static )
-        map.update( region_map( data[ "objects_uuid" ], map.size.width ) )
+        map.update( await region_map( data[ "objects_uuid" ], map.size.width ) )
 
-    def on_input_submitted( self, _: Input.Submitted ) -> None:
+    async def on_input_submitted( self, _: Input.Submitted ) -> None:
         """React to input being submitted.
 
         Args:
             event (Input.Submitted): The even for the submit.
         """
-        self.update_region_data()
+        await self.update_region_data()
 
-    def on_button_pressed( self, _: Button.Pressed ) -> None:
+    async def on_button_pressed( self, _: Button.Pressed ) -> None:
         """React to the search button being pressed.
 
         Args:
             event (Button.Pressed): The event for the press.
         """
-        self.update_region_data()
+        await self.update_region_data()
 
 ##############################################################################
 # Main entry point.
