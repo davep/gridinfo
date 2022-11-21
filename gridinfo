@@ -150,19 +150,17 @@ class Card( Vertical ):
             **kwargs,
         )
 
-##############################################################################
-def show_data( within: Card, data: dict[ str, str ] ) -> None:
-    """Show the data within the given panel.
+    def show( self, data: dict[ str, str ] ) -> None:
+        """Show the data within the given panel.
 
-    Args:
-        within (Container): The container that contains the fields.
-        data (dict[ str, str ]): The data to show.
-    """
-    for key, value in data.items():
-        try:
-            within.query_one( f"#{key}", DataPair ).value( value )
-        except NoMatches:
-            pass
+        Args:
+            data (dict[ str, str ]): The data to show.
+        """
+        for key, value in data.items():
+            try:
+                self.query_one( f"#{key}", DataPair ).value( value )
+            except NoMatches:
+                pass
 
 ##############################################################################
 class RegionInfo( Screen ):
@@ -219,7 +217,7 @@ class RegionInfo( Screen ):
     async def update_region_data( self ) -> None:
         """Update the region data."""
         data = await region_info( self.query_one( Input ).value )
-        show_data( self.query_one( "#region-info", Card ), data )
+        self.query_one( "#region-info", Card ).show( data )
         map = self.query_one( "#map", Static )
         map.update( await region_map( data[ "objects_uuid" ], map.size.width ) )
 
@@ -336,15 +334,15 @@ class Main( Screen ):
 
     async def refresh_grid_info( self ):
         """Refresh the information about the grid."""
-        show_data( self.query_one( "#grid-data", Card ), await grid_data() )
+        self.query_one( "#grid-data", Card ).show( await grid_data() )
 
     async def refresh_grid_concurrency( self ):
         """Refresh the grid concurrency data."""
-        show_data( self.query_one( "#grid-concurrency", Card ), await concurrency_data() )
+        self.query_one( "#grid-concurrency", Card ).show( await concurrency_data() )
 
     async def refresh_grid_size( self ):
         """Refresh the grid size data."""
-        show_data( self.query_one( "#grid-size", Card ), await grid_size_data() )
+        self.query_one( "#grid-size", Card ).show( await grid_size_data() )
 
     def on_mount( self ) -> None:
         """Set things in motion on mount"""
