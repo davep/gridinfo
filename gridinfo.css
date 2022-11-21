@@ -71,8 +71,18 @@ Card .data {
     width: 15;
 }
 
+#map-wrap {
+    height: 1fr;
+}
+
+#map-wrap .data {
+    layout: vertical;
+    overflow: auto;
+}
+
 #map {
-    overflow-x: auto;
+    width: auto;
+    height: auto;
 }
 
 /* gridinfo.css ends here */

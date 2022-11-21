@@ -197,7 +197,7 @@ class RegionInfo( Screen ):
             DataPair( "UUID", "region_uuid" ),
             id      = "region-info"
         )
-        yield Static( id="map" )
+        yield Card( "Map", Static( id="map" ), id="map-wrap" )
         yield Footer()
 
     def on_mount( self ) -> None:
@@ -218,8 +218,7 @@ class RegionInfo( Screen ):
         """Update the region data."""
         data = await region_info( self.query_one( Input ).value )
         self.query_one( "#region-info", Card ).show( data )
-        map = self.query_one( "#map", Static )
-        map.update( await region_map( data[ "objects_uuid" ], map.size.width ) )
+        self.query_one( "#map", Static ).update( await region_map( data[ "objects_uuid" ], 80 ) )
 
     async def on_input_submitted( self, _: Input.Submitted ) -> None:
         """React to input being submitted.
