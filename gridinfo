@@ -228,6 +228,17 @@ async def grid_data() -> dict[ str, str ]:
     return unpack_data( ( await get( "https://api.secondlife.com/datafeeds/homepage.txt" ) ).text, "\n" )
 
 ##############################################################################
+async def concurrency_data() -> dict[ str, str ]:
+    """Get the concurrency data about the grid.
+
+    Returns:
+        dict[ str, str ]: The grid's concurrency data.
+    """
+    return unpack_data( " ".join(
+        ( await get( gridsurvey( "metricquery.php?metric=concurrency" ) ) ).text.split( "\n" )
+    ) )
+
+##############################################################################
 class Main( Screen ):
     """The main screen for the application."""
 
@@ -247,8 +258,11 @@ class Main( Screen ):
         def _unix_to_local( unix: str ) -> str:
             return str( datetime.utcfromtimestamp( int( unix or "0" ) ) )
 
-        def _human_number( signups: str ) -> str:
-            return f"{int( signups or '0' ):,}"
+        def _human_number( value: str ) -> str:
+            try:
+                return f"{int( value or '0' ):,}"
+            except ValueError:
+                return f"{float( value or '0' ):,}"
 
         def _linden_dollar( linden_dollar: str ) -> str:
             return f"L$ {( linden_dollar or '0.00' )} per USD"
@@ -264,6 +278,16 @@ class Main( Screen ):
             id      = "grid-data",
             classes = "data"
         )
+        yield Container(
+            DataPair( "As Of", "date" ),
+            DataPair( "Last Updated", "updated" ),
+            DataPair( "Median", "median_online", cleaner=_human_number ),
+            DataPair( "Mean", "mean_online", cleaner=_human_number ),
+            DataPair( "Minimum", "min_online", cleaner=_human_number ),
+            DataPair( "Maximum", "max_online", cleaner=_human_number ),
+            id      = "grid-concurrency",
+            classes = "data"
+        )
         yield Footer()
 
     async def refresh_grid_info( self ):
@@ -275,9 +299,19 @@ class Main( Screen ):
             except NoMatches:
                 pass
 
+    async def refresh_grid_concurrency( self ):
+        """Refresh the grid concurrency data."""
+        data = await concurrency_data()
+        for key, value in data.items():
+            try:
+                self.query_one( f"#{key}", DataPair ).value( value )
+            except NoMatches:
+                pass
+
     def on_mount( self ) -> None:
         """Set things in motion on mount"""
         self.call_after_refresh( self.refresh_grid_info )
+        self.call_after_refresh( self.refresh_grid_concurrency )
 
     def action_region( self ) -> None:
         """Show the region search/information screen."""

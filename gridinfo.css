@@ -19,6 +19,14 @@
     width: 40;
 }
 
+#grid-concurrency {
+    height: 5;
+}
+
+#grid-concurrency .title {
+    width: 40;
+}
+
 #region-input {
     height: auto;
     color: $primary;
