@@ -151,15 +151,12 @@ class RegionInfo( Screen ):
         Returns:
             ComposeResult: The main layout for the application.
         """
-
         yield Header()
-
         yield Horizontal(
             Input( placeholder="Second Life Region Name" ),
             Button( "Search", disabled=True ),
             id="region-input"
         )
-
         yield Container(
             DataPair( "Name", "name" ),
             DataPair( "Status", "status" ),
@@ -173,12 +170,10 @@ class RegionInfo( Screen ):
             DataPair( "Terrain Map", "terrain_uuid" ),
             DataPair( "Updated", "updated" ),
             DataPair( "UUID", "region_uuid" ),
-            id="region-info",
-            classes="data"
+            id      = "region-info",
+            classes = "data"
         )
-
         yield Static( id="map" )
-
         yield Footer()
 
     def on_mount( self ) -> None:
@@ -266,8 +261,8 @@ class Main( Screen ):
             DataPair( "Signups Last Updated", "signups_updated_unix", cleaner=_unix_to_local ),
             DataPair( "Signups", "signups", cleaner=_human_number ),
             DataPair( "Exchange Rate Last Updated", "exchange_rate_updated_unix", cleaner=_unix_to_local ),
-            id="grid-data",
-            classes="data"
+            id      = "grid-data",
+            classes = "data"
         )
         yield Footer()
 
