@@ -251,7 +251,7 @@ class Main( Screen ):
             return f"{int( signups or '0' ):,}"
 
         def _linden_dollar( linden_dollar: str ) -> str:
-            return linden_dollar # TODO
+            return f"L$ {( linden_dollar or '0.00' )} per USD"
 
         yield Header()
         yield Container(
