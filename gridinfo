@@ -206,7 +206,7 @@ class RegionInfo( Screen ):
         """React to input being submitted.
 
         Args:
-            event (Input.Submitted): The even for the submit.
+            event (Input.Submitted): The event for the submit.
         """
         await self.update_region_data()
 
