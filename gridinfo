@@ -282,7 +282,7 @@ class Main( Screen ):
 
     BINDINGS = [
         Binding( "escape", "app.quit", "Quit" ),
-        Binding( "slash", "region", "Region Search" )
+        Binding( "slash", "app.push_screen( 'region' )", "Region Search" )
     ]
     """The bindings for the main screen."""
 
@@ -357,10 +357,6 @@ class Main( Screen ):
         self.call_after_refresh( self.refresh_grid_info )
         self.call_after_refresh( self.refresh_grid_concurrency )
         self.call_after_refresh( self.refresh_grid_size )
-
-    def action_region( self ) -> None:
-        """Show the region search/information screen."""
-        self.app.push_screen( "region" )
 
 ##############################################################################
 class GridInfo( App[ None ] ):
