@@ -1,9 +1,10 @@
 Card {
+    padding-top: 1;
     height: auto;
 }
 
 Card .caption {
-    margin: 1 1 0 1;
+    margin: 0 1 0 1;
     padding: 0 1 0 1;
     background: $secondary-background;
     width: auto;
@@ -77,16 +78,25 @@ Input.bad-region {
 
 #map-wrap {
     height: 1fr;
+    padding-top: 1;
+    padding-bottom: 1;
 }
 
 #map-wrap .data {
-    layout: vertical;
-    overflow: auto;
+    height: 1fr;
+    width: 1fr;
+    layout: horizontal;
+    overflow: scroll scroll;
 }
 
 #map {
-    width: auto;
-    height: auto;
+    width: 160;
+    height: 80;
+}
+
+.data:focus {
+    background: $secondary-background-lighten-1;
+    border: hkey $secondary-lighten-1;
 }
 
 /* gridinfo.css ends here */

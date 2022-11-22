@@ -147,11 +147,13 @@ class DataPair( Horizontal ):
 class Card( Vertical ):
     """Card widget with title and content."""
 
-    def __init__( self, caption: str, *args: Any, **kwargs: Any ) -> None:
+    def __init__( self, caption: str, *args: Any, can_focus: bool=False, **kwargs: Any ) -> None:
         """Initialise a card display."""
+        container = Container( *args, classes="data" )
+        container.can_focus = can_focus
         super().__init__(
             Static( caption, classes="caption" ),
-            Container( *args, classes="data" ),
+            container,
             **kwargs,
         )
 
@@ -202,7 +204,7 @@ class RegionInfo( Screen ):
             DataPair( "UUID", "region_uuid" ),
             id      = "region-info"
         )
-        yield Card( "Map", Static( id="map" ), id="map-wrap" )
+        yield Card( "Map", Static( id="map" ), id="map-wrap", can_focus=True )
         yield Footer()
 
     def on_mount( self ) -> None:
