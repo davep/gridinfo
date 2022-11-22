@@ -215,15 +215,17 @@ class RegionInfo( Screen ):
         Args:
             event (Input.Changed): The event for the change.
         """
-        self.query_one(
-            "#region-input Button", Button
-        ).disabled = not bool( event.input.value.strip() )
+        self.query_one(  "#region-input Button", Button ).disabled = not bool( event.input.value.strip() )
+        self.query_one( Input ).remove_class( "bad-region" )
 
     async def update_region_data( self ) -> None:
         """Update the region data."""
-        data = await region_info( self.query_one( Input ).value )
-        self.query_one( "#region-info", Card ).show( data )
-        self.query_one( "#map", Static ).update( await region_map( data[ "objects_uuid" ], 80 ) )
+        if "region_uuid" in ( data := await region_info( self.query_one( Input ).value ) ):
+            self.query_one( "#region-info", Card ).show( data )
+            self.query_one( "#map", Static ).update( await region_map( data[ "objects_uuid" ], 80 ) )
+        else:
+            self.app.bell()
+        self.query_one( Input ).set_class( "region_uuid" not in data, "bad-region" )
 
     async def on_input_submitted( self, _: Input.Submitted ) -> None:
         """React to input being submitted.

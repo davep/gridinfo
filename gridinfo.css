@@ -59,6 +59,10 @@ Card .data {
     width: 5fr;
 }
 
+Input.bad-region {
+    border: tall red;
+}
+
 #region-input Button {
     width: 1fr;
 }
