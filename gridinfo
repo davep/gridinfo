@@ -387,4 +387,4 @@ class GridInfo( App[ None ] ):
 if __name__ == "__main__":
     GridInfo().run()
 
-### gridinfo.py ends here
+### gridinfo ends here
