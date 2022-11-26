@@ -11,6 +11,7 @@ httpx = "*"
 [dev-packages]
 mypy = "*"
 pylint = "*"
+vermin = "*"
 
 [requires]
 python_version = "3.11"
