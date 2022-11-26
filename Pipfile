@@ -10,6 +10,7 @@ httpx = "*"
 
 [dev-packages]
 mypy = "*"
+pylint = "*"
 
 [requires]
 python_version = "3.11"
