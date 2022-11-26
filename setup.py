@@ -49,7 +49,7 @@ setup(
     include_package_data          = True,
     install_requires              = [ "textual", "rich-pixels", "httpx" ],
     python_requires               = ">=3.9",
-    keywords                      = "terminal textual secondlife",
+    keywords                      = "terminal textual secondlife mapping metaverse virtual-worlds",
     entry_points                  = {
         "console_scripts": "gridinfo=gridinfo.app:run"
     },
