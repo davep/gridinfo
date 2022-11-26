@@ -5,16 +5,18 @@ run    := pipenv run
 python := $(run) python
 lint   := $(run) pylint
 mypy   := $(run) mypy
+twine  := $(run) twine
+vermin := $(run) vermin -v --no-parse-comments --backport dataclasses --backport typing --eval-annotations
 
 ##############################################################################
 # Run the plotter.
 .PHONY: run
 run:
-	$(python) $(app)
+	$(python) -m $(app)
 
 .PHONY: debug
 debug:
-	$(run) textual run --dev $(app)
+	TEXTUAL=devtools make
 
 .PHONY: console
 console:
@@ -57,14 +59,44 @@ typecheck:			# Perform static type checks with mypy
 stricttypecheck:	        # Perform a strict static type checks with mypy
 	$(mypy) --scripts-are-modules --strict $(app)
 
+.PHONY: minpy
+minpy:				# Check the minimum supported Python version
+	$(vermin) $(app)
+
 .PHONY: checkall
 checkall: lint stricttypecheck # Check all the things
+
+##############################################################################
+# Package/publish.
+.PHONY: package
+package:			# Package the library
+	$(python) setup.py bdist_wheel
+
+.PHONY: spackage
+spackage:			# Create a source package for the library
+	$(python) setup.py sdist
+
+.PHONY: packagecheck
+packagecheck: package		# Check the packaging.
+	$(twine) check dist/*
+
+.PHONY: testdist
+testdist: packagecheck		# Perform a test distribution
+	$(twine) upload --skip-existing --repository testpypi dist/*
+
+.PHONY: dist
+dist: packagecheck		# Upload to pypi
+	$(twine) upload --skip-existing dist/*
 
 ##############################################################################
 # Utility.
 .PHONY: repl
 repl:				# Start a Python REPL
 	$(python)
+
+.PHONY: clean
+clean:				# Clean the build directories
+	rm -rf build dist $(app).egg-info
 
 .PHONY: help
 help:				# Display this help
